@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+      <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+
+  <title>Ambari部署Hadoop全过程</title>
+
+
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="origin" />
+  <meta name="generator" content="Pelican" />
+  <link href="" rel="canonical" />
+
+  <!-- Feed -->
+
+  <link href="/theme/css/style.css" type="text/css" rel="stylesheet" />
+
+  <!-- Code highlight color scheme -->
+      <link href="/theme/css/code_blocks/github.css" rel="stylesheet">
+
+
+  <!-- Custom fonts -->
+  <link href='https://fonts.googleapis.com/css?family=Montserrat:400,300' rel='stylesheet' type='text/css' />
+  <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css" />
+
+  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+  <![endif]-->
+
+
+    <link href="/ambaribu-shu-hadoopquan-guo-cheng.html" rel="canonical" />
+
+        <meta name="description" content="CentOS 7.4 安装 Ambari 2.6.0 + HDP 2.6.3 搭建Hadoop集群">
+
+        <meta name="author" content="Fixerrrrrr">
+
+
+        <meta property="og:locale" content="" />
+    <meta property="og:site_name" content="Fixerrrrrr's Blog" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Fixerrrrrr's Blog" />
+    <meta property="og:description" content="View the blog." />
+    <meta property="og:url" content="" />
+      <meta name="og:image" content="/theme/images/post-bg.jpg">
+      <meta property="article:publisher" content="https://facebook.com/myprofile" />
+
+  <meta property="og:type" content="article">
+            <meta property="article:author" content="/author/fixerrrrrr.html">
+  <meta property="og:url" content="/ambaribu-shu-hadoopquan-guo-cheng.html">
+  <meta property="og:title" content="Ambari部署Hadoop全过程">
+  <meta property="article:published_time" content="2019-03-06 22:56:18.432810+01:00">
+            <meta property="og:description" content="CentOS 7.4 安装 Ambari 2.6.0 + HDP 2.6.3 搭建Hadoop集群">
+
+            <meta property="og:image" content="/theme/images/post-bg.jpg">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@myprofile">
+        <meta name="twitter:title" content="Ambari部署Hadoop全过程">
+        <meta name="twitter:url" content="/ambaribu-shu-hadoopquan-guo-cheng.html">
+
+            <meta name="twitter:image:src" content="/theme/images/post-bg.jpg">
+
+            <meta name="twitter:description" content="CentOS 7.4 安装 Ambari 2.6.0 + HDP 2.6.3 搭建Hadoop集群">
+</head>
+<!-- TODO : Body class -->
+<body class="home-template">
+
+<nav id="menu">
+  <a class="close-button">Close</a>
+  <div class="nav-wrapper">
+    <p class="nav-label">Menu</p>
+    <ul>
+
+
+    </ul>
+  </div>
+</nav>
+    <!-- Progressbar -->
+    <div class="progress-container">
+        <span class="progress-bar"></span>
+    </div>
+
+    <!-- Page Header -->
+    <!-- Set your background image for this header on the line below. -->
+    <header id="post-header" class="has-cover">
+      <div class="inner">
+        <nav id="navigation">
+            <span id="home-button" class="nav-button">
+                <a class="home-button" href="" title="Home"><i class="ic ic-arrow-left"></i> Home</a>
+            </span>
+          <span id="menu-button" class="nav-button">
+            <a class="menu-button"><i class="ic ic-menu"></i> Menu</a>
+          </span>
+        </nav>
+        <h1 class="post-title">Ambari部署Hadoop全过程</h1>
+        <!-- TODO : Proper class for headline -->
+        <span class="post-meta">
+                <a href="/author/fixerrrrrr.html">Fixerrrrrr</a>
+            | <time datetime="Wed 06 March 2019">Wed 06 March 2019</time>
+        </span>
+        <!-- TODO : Modified check -->
+        
+            <div class="post-cover cover" style="background-image: url('/theme/images/post-bg.jpg')">
+        
+      </div>
+    </header>    
+
+  <section id="wrapper">
+    <a class="hidden-close"></a>
+
+    <!-- Post content -->
+    <main class="content" role="main">
+        <article class="post">
+        <div class="inner">
+            <section class="post-content">
+                <!-- TOC -->
+
+<ul>
+<li><a href="#1-ssh连接">1 SSH连接</a></li>
+<li><a href="#2-在新装centos74上的一些配置">2 在新装CentOS7.4上的一些配置</a><ul>
+<li><a href="#21-打开网络">2.1 打开网络</a></li>
+<li><a href="#22-关闭防火墙">2.2 关闭防火墙</a></li>
+<li><a href="#23-关闭dhcp服务设置静态ip">2.3 关闭DHCP服务，设置静态IP</a></li>
+<li><a href="#24-设置host">2.4 设置host</a></li>
+<li><a href="#25-设置ssh无密码">2.5 设置SSH无密码</a></li>
+<li><a href="#26-启动ntp">2.6 启动NTP</a></li>
+<li><a href="#27-设置fqdn">2.7 设置FQDN</a></li>
+<li><a href="#28-关闭selinux">2.8 关闭SELinux</a></li>
+</ul>
+</li>
+<li><a href="#3-制作本地源">3 制作本地源</a><ul>
+<li><a href="#31-安装httpd">3.1 安装httpd</a></li>
+<li><a href="#32-下载安装资源">3.2 下载安装资源</a></li>
+<li><a href="#33-下载repo资源">3.3 下载repo资源</a></li>
+<li><a href="#34-安装mysql数据库">3.4 安装Mysql数据库</a></li>
+<li><a href="#35-安装jdk">3.5 安装JDK</a></li>
+</ul>
+</li>
+<li><a href="#4-ambari安装">4 Ambari安装</a></li>
+<li><a href="#5-ambari集群配置">5 Ambari集群配置</a><ul>
+<li><a href="#51-设置集群名称">5.1 设置集群名称</a></li>
+<li><a href="#52-设置hdp安装源">5.2 设置HDP安装源</a></li>
+<li><a href="#53-设置集群机器">5.3 设置集群机器</a></li>
+<li><a href="#54-host-确认">5.4 Host 确认</a></li>
+<li><a href="#55-选择要安装的服务">5.5 选择要安装的服务</a></li>
+<li><a href="#56-各个服务master配置">5.6 各个服务Master配置</a></li>
+<li><a href="#57-服务的slaves-和-clients节配置">5.7 服务的Slaves 和 Clients节配置</a></li>
+<li><a href="#58-服务的客制化配置">5.8 服务的客制化配置</a></li>
+<li><a href="#59-安装完成">5.9 安装完成</a></li>
+</ul>
+</li>
+<li><a href="#6-测试hdfs和mapreduce">6 测试HDFS和MapReduce</a></li>
+</ul>
+<!-- /TOC -->
+
+<h2>1 SSH连接</h2>
+<p>刀片机1:
+<code>ssh -p 4420 root@202.120.37.79</code></p>
+<p>刀片机4:
+<code>ssh -p  4424 root@202.120.37.79</code></p>
+<h2>2 在新装CentOS7.4上的一些配置</h2>
+<h3>2.1 打开网络</h3>
+<p>在所有节点上设置，使服务器可以访问外网。</p>
+<div class="highlight"><pre><span></span>vi /etc/sysconfig/network-scripts/ifcfg-em1 
+#把onboot=no 改为 yes
+service network restart
+</pre></div>
+
+
+<h3>2.2 关闭防火墙</h3>
+<p>在所有节点上设置，使服务器可以被外网访问。</p>
+<div class="highlight"><pre><span></span>systemctl stop firewalld.service #停止firewall
+systemctl disable firewalld.service #禁止firewall开机启动
+</pre></div>
+
+
+<h3>2.3 关闭DHCP服务，设置静态IP</h3>
+<p>在所有节点上设置，防止服务器重启后重新分配ip。</p>
+<div class="highlight"><pre><span></span>vim /etc/sysconfig/network-scripts/ifcfg-em1
+</pre></div>
+
+
+<p>修改为（IPADDR设置对应ip）：</p>
+<div class="highlight"><pre><span></span>TYPE=Ethernet
+PROXY_METHOD=none
+BROWSER_ONLY=no
+BOOTPROTO=static
+DEFROUTE=yes
+IPV4_FAILURE_FATAL=no
+IPV6INIT=yes
+IPV6_AUTOCONF=yes
+IPV6_DEFROUTE=yes
+IPV6_FAILURE_FATAL=no
+IPV6_ADDR_GEN_MODE=stable-privacy
+NAME=ens33
+UUID=87a7a287-0360-476a-996c-a60012f7b087
+DEVICE=ens33
+ONBOOT=yes
+IPADDR=192.168.1.119
+PREFIX=24
+GATEWAY=192.168.1.1
+DNS1=192.168.1.1
+IPV6_PRIVACY=no
+</pre></div>
+
+
+<h3>2.4 设置host</h3>
+<p>在所有节点上设置，使Ambari可以通过主机名而不是ip地址来访问相应的服务器。</p>
+<p><em>修改hostname：</em></p>
+<div class="highlight"><pre><span></span>hostnamectl set-hostname dmaster
+hostnamectl set-hostname dslave1
+</pre></div>
+
+
+<p><em>修改hosts文件：</em></p>
+<div class="highlight"><pre><span></span>vim /etc/hosts
+
+#下方添加两行
+192.168.1.119 dmaster.hadoop dmaster
+192.168.1.115 dslave1.hadoop dslave1
+</pre></div>
+
+
+<h3>2.5 设置SSH无密码</h3>
+<p>利用Ambari安装hadoop集群，需要保证server节点能无密码远程登录agent节点。所以，该操作仅需在dmaster上进行。</p>
+<p><em>dmaster：</em></p>
+<div class="highlight"><pre><span></span>ssh-keygen
+cd ~/.ssh/
+cat id_rsa.pub &gt;&gt;authorized_keys
+chmod 600 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+</pre></div>
+
+
+<p><em>dslave：</em></p>
+<div class="highlight"><pre><span></span> mkdir ~/.ssh/
+</pre></div>
+
+
+<p><em>dmaster：</em></p>
+<div class="highlight"><pre><span></span><span class="n">scp</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="p">.</span><span class="n">ssh</span><span class="o">/</span><span class="n">authorized_keys</span> <span class="n">root</span><span class="mf">@192.168.1.115</span><span class="o">:/</span><span class="n">root</span><span class="o">/</span><span class="p">.</span><span class="n">ssh</span><span class="o">/</span><span class="n">authorized_keys</span>
+</pre></div>
+
+
+<h3>2.6 启动NTP</h3>
+<p>在所有节点上设置，Ambari过程中要求各个节点时间同步。</p>
+<div class="highlight"><pre><span></span>yum install ntp
+systemctl is-enabled ntpd
+systemctl enable ntpd
+systemctl start ntpd
+</pre></div>
+
+
+<h3>2.7 设置FQDN</h3>
+<p>在所有节点上设置，安装时，需要设置FQDN，每个节点都要设置，因为agent向server发送心跳时，第一次要携带FQDN作为自己的标记。而server是通过FQDN识别每个agent的；如果FQDN设置错误，server与agent将无法通信。</p>
+<div class="highlight"><pre><span></span>vim /etc/sysconfig/network
+NETWORKING=yes
+HOSTNAME=dmaster.hadoop
+</pre></div>
+
+
+<h3>2.8 关闭SELinux</h3>
+<p>在所有节点上设置，Ambari-server安装过程中会要求暂时关闭SELinux。</p>
+<div class="highlight"><pre><span></span>setenforce 0
+</pre></div>
+
+
+<h2>3 制作本地源</h2>
+<p>Ambari的安装，默认使用的是网络源，故而安装过程中极易受到网速的影响，从而导致安装失败。为了安装的顺利，搭建本地源。制作本地源将在dmaster上进行。</p>
+<h3>3.1 安装httpd</h3>
+<p>为了搭建本地源，需要准备一台http服务器发布安装源。</p>
+<div class="highlight"><pre><span></span>yum install httpd
+
+systemctl start httpd.service
+systemctl enable httpd.service
+
+yum install yum-utils createrepo
+</pre></div>
+
+
+<h3>3.2 下载安装资源</h3>
+<p>防止安装失败后需要重新下载，将安装资源下载到本地后通过scp上传到服务器上。</p>
+<p><em>安装资源下载地址：</em>
+<table>
+  <tr>
+  <td>Ambari-2.6.0</td>
+  <td>http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.0.0/ambari-2.6.0.0-centos7.tar.gz</td>
+  </tr>
+  <tr>
+  <td>HDP-2.6.3</td>
+  <td>http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.3.0/HDP-2.6.3.0-centos7-rpm.tar.gz</td>
+  </tr>
+  <tr>
+  <td>HDP-UTILS</td>
+  <td>http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7/HDP-UTILS-1.1.0.21-centos7.tar.gz
+</td>
+  </tr>
+  </table></p>
+<p><em>将安装资源上传到dmaster相应路径：</em></p>
+<div class="highlight"><pre><span></span><span class="cp">#dmaster</span>
+<span class="n">cd</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span>
+<span class="n">mkdir</span> <span class="n">ambari</span>
+<span class="n">cd</span> <span class="n">ambari</span>
+<span class="n">mkdir</span> <span class="n">HDP</span><span class="o">-</span><span class="n">UTILS</span>
+
+<span class="cp">#本地物理机</span>
+<span class="n">scp</span> <span class="o">-</span><span class="n">P</span> <span class="mi">4420</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">ambari</span><span class="o">-</span><span class="mf">2.6.0.0</span><span class="o">-</span><span class="n">centos7</span><span class="p">.</span><span class="n">tar</span> <span class="n">root</span><span class="mf">@202.120.37.79</span><span class="o">:/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">ambari</span>
+<span class="n">scp</span> <span class="o">-</span><span class="n">P</span> <span class="mi">4420</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">HDP</span><span class="o">-</span><span class="mf">2.6.3.0</span><span class="o">-</span><span class="n">centos7</span><span class="o">-</span><span class="n">rpm</span><span class="p">.</span><span class="n">tar</span> <span class="n">root</span><span class="mf">@202.120.37.79</span><span class="o">:/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">ambari</span>
+<span class="n">scp</span> <span class="o">-</span><span class="n">P</span> <span class="mi">4420</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">HDP</span><span class="o">-</span><span class="n">UTILS</span><span class="o">-</span><span class="mf">1.1.0.21</span><span class="o">-</span><span class="n">centos7</span><span class="p">.</span><span class="n">tar</span> <span class="n">root</span><span class="mf">@202.120.37.79</span><span class="o">:/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">ambari</span><span class="o">/</span><span class="n">HDP</span><span class="o">-</span><span class="n">UTILS</span>
+
+<span class="cp">#dmaster在对应路径下解压</span>
+<span class="n">tar</span> <span class="o">-</span><span class="n">xvf</span> <span class="n">ambari</span><span class="o">-</span><span class="mf">2.6.0.0</span><span class="o">-</span><span class="n">centos7</span><span class="p">.</span><span class="n">tar</span> 
+<span class="n">tar</span> <span class="o">-</span><span class="n">xvf</span> <span class="n">HDP</span><span class="o">-</span><span class="mf">2.6.3.0</span><span class="o">-</span><span class="n">centos7</span><span class="o">-</span><span class="n">rpm</span><span class="p">.</span><span class="n">tar</span> 
+<span class="n">tar</span> <span class="o">-</span><span class="n">xvf</span> <span class="n">HDP</span><span class="o">-</span><span class="n">UTILS</span><span class="o">-</span><span class="mf">1.1.0.21</span><span class="o">-</span><span class="n">centos7</span><span class="p">.</span><span class="n">tar</span> 
+</pre></div>
+
+
+<h3>3.3 下载repo资源</h3>
+<p>yum会读取所有以repo结尾的源仓库信息来下载安装程序。</p>
+<div class="highlight"><pre><span></span>yum install wget
+
+wget http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.0.0/ambari.repo
+wget http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.3.0/hdp.repo
+</pre></div>
+
+
+<p><em>修改其中的URL为本地源路径：</em></p>
+<div class="highlight"><pre><span></span>vim ambari.repo 
+
+#VERSION_NUMBER=2.6.0.0-267
+[ambari-2.6.0.0]
+name=ambari Version - ambari-2.6.0.0
+baseurl=http://192.168.1.119/ambari/ambari/centos7/2.6.0.0-267
+gpgcheck=1
+gpgkey=http://192.168.1.119/ambari/ambari/centos7/2.6.0.0-267/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+enabled=1
+priority=1
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>vim hdp.repo 
+
+#VERSION_NUMBER=2.6.3.0-235
+[HDP-2.6.3.0]
+name=HDP Version - HDP-2.6.3.0
+baseurl=http://192.168.1.119/ambari/HDP/centos7/2.6.3.0-235
+gpgcheck=1
+gpgkey=http://192.168.1.119/ambari/HDP/centos7/2.6.3.0-235/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+enabled=1
+priority=1
+
+[HDP-UTILS-1.1.0.21]
+name=HDP Utils Version - HDP-UTILS-1.1.0.21
+baseurl=http://192.168.1.119/ambari/HDP-UTILS
+gpgcheck=1
+gpgkey=http://192.168.1.119/ambari/HDP-UTILS/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+enabled=1
+priority=1
+</pre></div>
+
+
+<p><em>将上面的修改过的repo放到/etc/yum.repos.d/下面：</em></p>
+<div class="highlight"><pre><span></span>mv ambari.repo /etc/yum.repos.d/
+mv hdp.repo /etc/yum.repos.d/
+
+yum clean all
+yum list update
+yum makecache
+yum repolist
+</pre></div>
+
+
+<h3>3.4 安装Mysql数据库</h3>
+<p>Ambari安装会将安装等信息写入数据库，建议使用MariaDB数据库。</p>
+<div class="highlight"><pre><span></span>yum install mariadb-server
+systemctl start mariadb
+systemctl enable mariadb
+mysql_secure_installation
+#除设置密码一路回车
+</pre></div>
+
+
+<p><em>安装完成后创建ambari、hive、oozie数据库及用户:</em></p>
+<div class="highlight"><pre><span></span>mysql -uroot -p
+
+create database ambari character set utf8 ;  
+CREATE USER &#39;ambari&#39;@&#39;%&#39;IDENTIFIED BY &#39;nrllab122b&#39;;
+GRANT ALL PRIVILEGES ON *.* TO &#39;ambari&#39;@&#39;%&#39;;
+FLUSH PRIVILEGES;
+
+create database hive character set utf8 ;  
+CREATE USER &#39;hive&#39;@&#39;%&#39;IDENTIFIED BY &#39;nrllab122b&#39;;
+GRANT ALL PRIVILEGES ON *.* TO &#39;hive&#39;@&#39;%&#39;;
+FLUSH PRIVILEGES;
+
+create database oozie character set utf8 ;  
+CREATE USER &#39;oozie&#39;@&#39;%&#39;IDENTIFIED BY &#39;nrllab122b&#39;;
+GRANT ALL PRIVILEGES ON *.* TO &#39;oozie&#39;@&#39;%&#39;;
+FLUSH PRIVILEGES;
+</pre></div>
+
+
+<p><em>安装mysql jdbc 驱动:</em></p>
+<div class="highlight"><pre><span></span>yum install mysql-connector-java
+</pre></div>
+
+
+<h3>3.5 安装JDK</h3>
+<p>下载jdk-8u152-linux-x64.tar至本地后scp上传到dmaster服务器。</p>
+<div class="highlight"><pre><span></span><span class="cp">#本地物理机</span>
+<span class="n">scp</span> <span class="o">-</span><span class="n">P</span> <span class="mi">4420</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">jdk</span><span class="o">-</span><span class="mi">8u152</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">x64</span><span class="p">.</span><span class="n">tar</span> <span class="n">root</span><span class="mf">@202.120.37.79</span><span class="o">:/</span><span class="n">opt</span><span class="o">/</span><span class="n">java</span><span class="o">/</span>
+
+<span class="cp">#dmaster</span>
+<span class="n">tar</span> <span class="o">-</span><span class="n">xvf</span> <span class="n">jdk</span><span class="o">-</span><span class="mi">8u152</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">x64</span><span class="p">.</span><span class="n">tar</span>
+<span class="n">vim</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">profile</span>
+<span class="n">export</span> <span class="n">JAVA_HOME</span><span class="o">=/</span><span class="n">opt</span><span class="o">/</span><span class="n">java</span><span class="o">/</span><span class="n">jdk1</span><span class="mf">.8.0</span><span class="n">_152</span>
+<span class="n">export</span> <span class="n">CLASSPATH</span><span class="o">=</span><span class="p">.</span><span class="o">:</span><span class="err">$</span><span class="n">JAVA_HOME</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">dt</span><span class="p">.</span><span class="nl">jar</span><span class="p">:</span><span class="err">$</span><span class="n">JAVA_HOME</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">tools</span><span class="p">.</span><span class="n">jar</span>
+<span class="n">PATH</span><span class="o">=</span><span class="err">$</span><span class="nl">PATH</span><span class="p">:</span><span class="err">$</span><span class="n">HOME</span><span class="o">/</span><span class="nl">bin</span><span class="p">:</span><span class="err">$</span><span class="n">JAVA_HOME</span><span class="o">/</span><span class="n">bin</span>
+<span class="n">source</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">profile</span>
+</pre></div>
+
+
+<h2>4 Ambari安装</h2>
+<div class="highlight"><pre><span></span>yum install ambari-server
+ambari-server setup
+</pre></div>
+
+
+<p>下面是配置执行流程，按照提示操作</p>
+<p>1.检查SELinux是否关闭，如果关闭不用操作</p>
+<p>2.提示是否自定义设置。输入：y</p>
+<div class="highlight"><pre><span></span>Customize user account for ambari-server daemon [y/n] (n)? y
+</pre></div>
+
+
+<p>3.ambari-server 账号。回车</p>
+<div class="highlight"><pre><span></span>Enter user account for ambari-server daemon (root):
+</pre></div>
+
+
+<p>4.检查防火墙，如果关闭则不用操作</p>
+<p>5.设置JDK。输入：3</p>
+<div class="highlight"><pre><span></span>Checking JDK...
+Do you want to change Oracle JDK [y/n] (n)? y
+[1] Oracle JDK 1.8 + Java Cryptography Extension (JCE) Policy Files 8
+[2] Oracle JDK 1.7 + Java Cryptography Extension (JCE) Policy Files 7
+[3] Custom JDK
+==============================================================================
+Enter choice (1): 3
+</pre></div>
+
+
+<p>6.如果上面选择3自定义JDK,则需要设置JAVA_HOME。输入：/opt/java/jdk1.8.0_152</p>
+<div class="highlight"><pre><span></span><span class="n">WARNING</span><span class="o">:</span> <span class="n">JDK</span> <span class="n">must</span> <span class="n">be</span> <span class="n">installed</span> <span class="n">on</span> <span class="n">all</span> <span class="n">hosts</span> <span class="n">and</span> <span class="n">JAVA_HOME</span> <span class="n">must</span> <span class="n">be</span> <span class="n">valid</span> <span class="n">on</span> <span class="n">all</span> <span class="n">hosts</span><span class="o">.</span>
+<span class="n">WARNING</span><span class="o">:</span> <span class="n">JCE</span> <span class="n">Policy</span> <span class="n">files</span> <span class="n">are</span> <span class="n">required</span> <span class="k">for</span> <span class="n">configuring</span> <span class="n">Kerberos</span> <span class="n">security</span><span class="o">.</span> <span class="n">If</span> <span class="n">you</span> <span class="n">plan</span> <span class="n">to</span> <span class="n">use</span> <span class="n">Kerberos</span><span class="o">,</span><span class="n">please</span> <span class="n">make</span> <span class="n">sure</span> <span class="n">JCE</span> <span class="n">Unlimited</span> <span class="n">Strength</span> <span class="n">Jurisdiction</span> <span class="n">Policy</span> <span class="n">Files</span> <span class="n">are</span> <span class="n">valid</span> <span class="n">on</span> <span class="n">all</span> <span class="n">hosts</span><span class="o">.</span>
+<span class="n">Path</span> <span class="n">to</span> <span class="n">JAVA_HOME</span><span class="o">:</span> <span class="sr">/opt/java/</span><span class="n">jdk1</span><span class="o">.</span><span class="mf">8.0</span><span class="n">_152</span>
+<span class="n">Validating</span> <span class="n">JDK</span> <span class="n">on</span> <span class="n">Ambari</span> <span class="n">Server</span><span class="o">...</span><span class="n">done</span><span class="o">.</span>
+<span class="n">Completing</span> <span class="n">setup</span><span class="o">...</span>
+</pre></div>
+
+
+<p>7.数据库配置。选择：y</p>
+<div class="highlight"><pre><span></span>Configuring database...
+Enter advanced database configuration [y/n] (n)? y
+</pre></div>
+
+
+<p>8.选择数据库类型。输入：3</p>
+<div class="highlight"><pre><span></span>Configuring database...
+==============================================================================
+Choose one of the following options:
+[1] - PostgreSQL (Embedded)
+[2] - Oracle
+[3] - MySQL
+[4] - PostgreSQL
+[5] - Microsoft SQL Server (Tech Preview)
+[6] - SQL Anywhere
+==============================================================================
+Enter choice (3): 3
+</pre></div>
+
+
+<p>9.设置数据库的具体配置信息，根据实际情况输入，如果和括号内相同，则可以直接回车。</p>
+<p>10.提示必须安装MySQL JDBC，回车结束ambari配置</p>
+<p>11.将Ambari数据库脚本导入到数据库</p>
+<div class="highlight"><pre><span></span>mysql -u  -p
+use ambari；
+source /var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql
+</pre></div>
+
+
+<h2>5 Ambari集群配置</h2>
+<h3>5.1 设置集群名称</h3>
+<p>hadoop</p>
+<p><img alt="20190305151659-image.png" src="https://ws1.sinaimg.cn/large/7b5fc28cly1g0rxxpqis1j20zz0hf0wj.jpg"></p>
+<h3>5.2 设置HDP安装源</h3>
+<p>选择HDP2.6 ,并且设置Advanced Repository Options 的信息，本次使用本地源(Use LocalRepository)，所以修改对用系统的安装源为本地源地址。</p>
+<blockquote>
+<p>Base URL: \
+http://192.168.1.119/ambari/HDP/centos7/2.6.3.0-235/ \
+http://192.168.1.119/ambari/HDP-UTILS/</p>
+</blockquote>
+<p><img alt="20190225171108-image.png" src="https://ws1.sinaimg.cn/large/7b5fc28cly1g0isa1ljmxj20o70lomyl.jpg"></p>
+<h3>5.3 设置集群机器</h3>
+<p>Target Hosts:</p>
+<div class="highlight"><pre><span></span>dmaster.hadoop
+dslave1.hadoop 
+</pre></div>
+
+
+<p>Host Registration Information:</p>
+<div class="highlight"><pre><span></span>cd .ssh 
+vim id_dsa 
+#copy进去
+</pre></div>
+
+
+<p><img alt="20190226220029-image.png" src="https://ws1.sinaimg.cn/large/7b5fc28cly1g0k69end4fj20lv0g1my2.jpg"></p>
+<h3>5.4 Host 确认</h3>
+<p>确认前面配置集群中hosts列表 中的机器是否都可用，也可以移除相关机器，集群中机器Success后进行下一步操作。</p>
+<h3>5.5 选择要安装的服务</h3>
+<p>选择HDFS和Spark2</p>
+<h3>5.6 各个服务Master配置</h3>
+<p>把下图中Hive Metastore和HiveServer2部署到dslave1上</p>
+<p><img alt="20190226221923-image.png" src="https://ws1.sinaimg.cn/large/7b5fc28cly1g0k6t4zw5rj20lj0gemyw.jpg"></p>
+<h3>5.7 服务的Slaves 和 Clients节配置</h3>
+<p>服务的Slaves 和 Clients节配置（按默认设置）</p>
+<p><img alt="20190226220857-image.png" src="https://ws1.sinaimg.cn/large/7b5fc28cgy1g0k6i85zjnj20m00bnwfe.jpg"></p>
+<h3>5.8 服务的客制化配置</h3>
+<p>在damster上运行命令：</p>
+<div class="highlight"><pre><span></span>ambari-server setup --jdbc-db=mysql --jdbc-driver=/usr/share/java/mysql-connector-java.jar
+</pre></div>
+
+
+<p>选择Existing MySQL</p>
+<p>Ambari Metrics和SmartSense的密码为admin</p>
+<p><img alt="20190226223729-image.png" src="https://ws1.sinaimg.cn/large/7b5fc28cly1g0k7bz215mj20l70m4myt.jpg"></p>
+<h3>5.9 安装完成</h3>
+<p>若报错可以查看错误log：</p>
+<div class="highlight"><pre><span></span>tail -n 20 /var/log/ambari-server/ambari-server.log
+</pre></div>
+
+
+<h2>6 测试HDFS和MapReduce</h2>
+<p>修改权限：</p>
+<div class="highlight"><pre><span></span>chmod 755 -R /root
+sudo -u hdfs hadoop fs -chmod -R 777 /
+</pre></div>
+
+
+<p>put操作和wordcount测试：</p>
+<div class="highlight"><pre><span></span>hadoop fs -ls 
+hadoop fs -mkdir input
+hadoop fs -put ~/1.html /input
+hadoop fs -put 
+hadoop fs -get output output
+hadoop jar usr/hdp/2.6.3.0-235/hadoop-mapreduce/hadoop-mapreduce-examples-2.7.3.2.6.3.0-235.jar wordcount /input output
+hadoop fs -cat /output/*
+</pre></div>
+            </section>
+
+            <section class="post-info">
+                <div class="post-share">
+                    <a class="twitter" href="https://twitter.com/share?text=Ambari部署Hadoop全过程&amp;url=/ambaribu-shu-hadoopquan-guo-cheng.html" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+                    <i class="ic ic-twitter"></i><span class="hidden">Twitter</span>
+                    </a>
+                    <a class="facebook" href="https://www.facebook.com/sharer/sharer.php?u=/ambaribu-shu-hadoopquan-guo-cheng.html" onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+                    <i class="ic ic-facebook"></i><span class="hidden">Facebook</span>
+                    </a>
+                    <a class="googleplus" href="https://plus.google.com/share?url=/ambaribu-shu-hadoopquan-guo-cheng.html" onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+                    <i class="ic ic-googleplus"></i><span class="hidden">Google+</span>
+                    </a>
+                    <div class="clear"></div>
+                </div>
+
+
+                <div class="clear"></div>
+
+ 
+
+                </section>
+
+
+                <aside class="post-nav">
+                    <div class="clear"></div>
+                </aside>
+
+            </div>
+        </article>
+    </main>
+      <!-- TODO : Body class -->
+    <div id="body-class" style="display: none;" class=""></div>
+  
+    <footer id="footer">
+      <div class="inner">
+        <section class="credits">
+          <span class="credits-theme">Theme <a href="https://github.com/arulrajnet/attila" rel="nofollow">Attila</a></span>
+          <span class="credits-software">Published with <a href="https://github.com/getpelican/pelican" rel="nofollow">Pelican</a></span>
+        </section>
+      </div>
+    </footer>
+  </section>
+
+  <script type="text/javascript" src="/theme/js/script.js"></script>
+  
+</body>
+</html>
